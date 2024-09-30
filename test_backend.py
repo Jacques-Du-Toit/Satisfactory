@@ -226,3 +226,13 @@ def test_all_trees_from_part():
             ]
         ]
     ]
+
+
+def test_eval_tree():
+    assert eval_tree(all_trees_from_part('reinforced iron plate', 15)[0]) == {
+        "inputs per minute": {
+            "iron ingot": 180.0
+        },
+        "machines used": 15.0,
+        "power usage": 27
+    }

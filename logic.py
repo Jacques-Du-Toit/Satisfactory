@@ -74,6 +74,11 @@ parts = {
     ]
 }
 
+power_usage = {
+    'constructor': 4,
+    'assembler': 15
+}
+
 
 def all_combinations(choices: list[list]) -> list:
     """
@@ -105,7 +110,9 @@ def all_trees_from_part(part: str, required_per_minute: float, layer: int = 0) -
         How Much the part above this one requires from this recipe per minute
     :param layer:
         What layer (how far from the top) we currently are
+
     :return:
+        List of all possible routes that can be taken to create the part
     """
     # should be a list
     recipes = deepcopy(parts[part])
@@ -138,6 +145,33 @@ def all_trees_from_part(part: str, required_per_minute: float, layer: int = 0) -
     return all_ways_of_making
 
 
+def eval_tree(tree: list, stats: dict = None) -> dict:
+    if not stats:
+        stats = {
+            'inputs per minute': {},
+            'machines used': 0,
+            'power usage': 0
+        }
+
+    top_layer = tree[0]
+    if 'inputs' not in top_layer:
+        # means it is a base part
+        base_part = top_layer['part']
+        if top_layer['part'] not in stats['inputs per minute']:
+            stats['inputs per minute'][base_part] = 0
+        stats['inputs per minute'][base_part] += top_layer['required_per_minute']
+    else:
+        # composite part
+        num_machines = top_layer['machines_required']
+        stats['machines used'] += num_machines
+        stats['power usage'] += power_usage[top_layer['machine']] * num_machines
+
+        for top_layer_input in tree[1:]:
+            eval_tree(top_layer_input, stats)
+
+    return stats
+
+
 def custom_format(obj, indent_level=0):
     indent = '\t' * indent_level
     if isinstance(obj, dict):
@@ -163,4 +197,21 @@ def custom_format(obj, indent_level=0):
     return formatted
 
 
+def stats_for_part(part: str, required_per_minute: float):
+    trees = all_trees_from_part(part, required_per_minute)
+    compared = {}
+    for t, tree in enumerate(trees):
+        compared[t] = {
+            'stats': eval_tree(tree),
+            'tree': tree
+        }
+    #print(custom_format(compared))
+    return compared
 
+
+if __name__ == "__main__":
+    print(custom_format(all_trees_from_part('reinforced iron plate', 15)))
+
+    scenarios = stats_for_part('reinforced iron plate', 5)
+    for scenario in scenarios:
+        print(scenarios[scenario]['stats'])
