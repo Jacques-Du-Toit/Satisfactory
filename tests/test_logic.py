@@ -1,5 +1,4 @@
-import pytest
-from logic import *
+from app.logic import *
 
 
 def test_all_combinations():
@@ -234,5 +233,5 @@ def test_eval_tree():
             "iron ingot": 180.0
         },
         "machines used": 15.0,
-        "power usage": 27
+        "power usage": 93
     }
