@@ -15,9 +15,9 @@ class MainWindow(QMainWindow):
         self.tree_index = 0
         self.setWindowTitle("Satisfactory Helper")
         self.setWindowIcon(QIcon("../images/satisfactory_icon.webp"))
-        self.initUI(self.trees[self.tree_index])
+        self.gui_for_recipe(self.trees[self.tree_index])
 
-    def show_stats(self, tree: list):
+    def show_stats(self, tree: list) -> QFrame:
         stats = eval_tree(tree)
 
         stats_frame = QFrame(self)
@@ -46,13 +46,13 @@ class MainWindow(QMainWindow):
         stats_frame.adjustSize()
         return stats_frame
 
-    def next_recipe_click(self):
+    def next_recipe_click(self) -> None:
         self.tree_index += 1
-        self.initUI(self.trees[self.tree_index])
+        self.gui_for_recipe(self.trees[self.tree_index])
 
-    def previous_recipe_click(self):
+    def previous_recipe_click(self) -> None:
         self.tree_index -= 1
-        self.initUI(self.trees[self.tree_index])
+        self.gui_for_recipe(self.trees[self.tree_index])
 
     def recipe_buttons(self) -> QFrame:
         buttons_frame = QFrame(self)
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
         outer_layout.addWidget(this_recipe)
         return recipe_and_output
 
-    def inputs_to_outputs(self, layer: list):
+    def inputs_to_outputs(self, layer: list) -> QFrame:
         inputs_outputs_frame = QFrame(self)
 
         # Create a complete layout for both outputs and inputs
@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
         inputs_outputs_frame.adjustSize()
         return inputs_outputs_frame
 
-    def initUI(self, tree: list):
+    def gui_for_recipe(self, tree: list) -> None:
         tree_ui = self.inputs_to_outputs(tree)
 
         # Create a central widget for the main window

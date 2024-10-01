@@ -2,6 +2,8 @@ from copy import deepcopy
 
 parts = {
     'iron ingot': None,
+    'copper ingot': None,
+
     'iron plate': [
         { # recipe 1
             'index': 'iron plate 0',
@@ -210,7 +212,7 @@ def stats_for_part(part: str, required_per_minute: float):
 
 
 if __name__ == "__main__":
-    print(custom_format(all_trees_from_part('reinforced iron plate', 15)))
+    print(custom_format(all_trees_from_part('reinforced iron plate', 15)[0]))
 
     scenarios = stats_for_part('reinforced iron plate', 5)
     for scenario in scenarios:
