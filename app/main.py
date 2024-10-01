@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QPushButton, QWidget, QHBoxLayout, QGridLayout, QFrame,
-    QHBoxLayout, QVBoxLayout
+    QApplication, QMainWindow, QLabel, QPushButton,
+    QWidget, QFrame, QHBoxLayout, QVBoxLayout
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
@@ -9,12 +9,74 @@ from app.logic import *
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, tree):
+    def __init__(self, part: str, required: float):
         super().__init__()
-        self.tree = tree
+        self.trees = all_trees_from_part(part, required)
+        self.tree_index = 0
         self.setWindowTitle("Satisfactory Helper")
         self.setWindowIcon(QIcon("../images/satisfactory_icon.webp"))
-        self.initUI()
+        self.initUI(self.trees[self.tree_index])
+
+    def show_stats(self, tree: list):
+        stats = eval_tree(tree)
+
+        stats_frame = QFrame(self)
+        stats_frame.setStyleSheet(
+            "border: 2px solid black;"
+            "padding: 20px;"
+            "border-radius: 10px;"
+            "font-size: 16px;"
+            "font-family: Arial;"
+            "font-weight: Bold;"
+        )
+
+        stats_layout = QVBoxLayout(stats_frame)
+
+        stats_label = QLabel(f"STATS")
+        stats_label.setStyleSheet("border: None; font-size: 20px;")
+        stats_label.setAlignment(Qt.AlignCenter)
+        stats_layout.addWidget(stats_label)
+
+        for stat in stats:
+            stats_label = QLabel(f"{stat}: {stats[stat]}")
+            stats_label.setStyleSheet("border: None;")
+            stats_label.setAlignment(Qt.AlignCenter)
+            stats_layout.addWidget(stats_label)
+
+        stats_frame.adjustSize()
+        return stats_frame
+
+    def next_recipe_click(self):
+        self.tree_index += 1
+        self.initUI(self.trees[self.tree_index])
+
+    def previous_recipe_click(self):
+        self.tree_index -= 1
+        self.initUI(self.trees[self.tree_index])
+
+    def recipe_buttons(self) -> QFrame:
+        buttons_frame = QFrame(self)
+        buttons_layout = QHBoxLayout(buttons_frame)
+
+        previous_recipe = QPushButton('<')
+        if self.tree_index == 0:
+            previous_recipe.setDisabled(True)
+        else:
+            previous_recipe.setDisabled(False)
+        previous_recipe.clicked.connect(self.previous_recipe_click)
+        buttons_layout.addWidget(previous_recipe)
+
+        next_recipe = QPushButton('>')
+        if self.tree_index == len(self.trees) - 1:
+            next_recipe.setDisabled(True)
+        else:
+            next_recipe.setDisabled(False)
+        next_recipe.clicked.connect(self.next_recipe_click)
+        buttons_layout.addWidget(next_recipe)
+
+        buttons_frame.adjustSize()
+        return buttons_frame
+
 
     def create_input_box(self, outer_frame: QFrame, recipe_input: dict) -> QLabel:
         sub_label = QLabel(f"{recipe_input['part']}\n{recipe_input['required_per_minute']}", outer_frame)
@@ -116,25 +178,32 @@ class MainWindow(QMainWindow):
         inputs_outputs_frame.adjustSize()
         return inputs_outputs_frame
 
-    def initUI(self):
-
-        final = self.inputs_to_outputs(self.tree)
+    def initUI(self, tree: list):
+        tree_ui = self.inputs_to_outputs(tree)
 
         # Create a central widget for the main window
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
         # Create a layout for the central widget
-        layout = QVBoxLayout(central_widget)
+        layout = QHBoxLayout(central_widget)
 
         # Add the final frame to the layout and align it to the center
-        layout.addWidget(final, alignment=Qt.AlignCenter)
+        layout.addWidget(tree_ui, stretch=10, alignment=Qt.AlignCenter)
+
+        stats_and_turn = QVBoxLayout()
+        stats_ui = self.show_stats(tree)
+        button_ui = self.recipe_buttons()
+        stats_and_turn.addWidget(stats_ui, alignment=Qt.AlignTop)
+        stats_and_turn.addWidget(button_ui, alignment=Qt.AlignBottom)
+
+        layout.addLayout(stats_and_turn, stretch=1)
+
 
 
 def main():
     app = QApplication(sys.argv)
-    tree = all_trees_from_part('reinforced iron plate', 5)[1]
-    window = MainWindow(tree)
+    window = MainWindow('reinforced iron plate', 15)
     window.showMaximized()
     sys.exit(app.exec_())
 
