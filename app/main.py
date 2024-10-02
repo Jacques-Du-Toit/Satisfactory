@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
         self.trees = all_trees_from_part(part, required)
         self.tree_index = 0
         self.setWindowTitle("Satisfactory Helper")
-        self.setWindowIcon(QIcon("../images/satisfactory_icon.webp"))
+        self.setWindowIcon(QIcon("../images/satisfactory_icon.jpeg"))
         self.gui_for_recipe(self.trees[self.tree_index])
 
 
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
 
     def create_input_box(self, outer_frame: QFrame, recipe_input: dict) -> QLabel:
         sub_label = QLabel(f"{recipe_input['part']}\n{recipe_input['required_per_minute']}", outer_frame)
-        sub_label.setStyleSheet("border: None; background-color: hsl(167, 7%, 78%);")
+        sub_label.setStyleSheet("border: None; background-color: #5c5b5b;")
         sub_label.setAlignment(Qt.AlignCenter)
         return sub_label
 
@@ -219,7 +219,25 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    window = MainWindow('modular frame', 2)
+    dark_mode = True
+    if dark_mode:
+        dark_stylesheet = """
+        QMainWindow {
+            background-color: #2B2B2B;
+            color: #FFFFFF;
+        }
+    
+        QWidget {
+            background-color: #2B2B2B;
+            color: #FFFFFF;
+        }
+        QPushButton:disabled {
+            background-color: #242323;
+            color: #7F7F7F;             
+        }
+        """
+        app.setStyleSheet(dark_stylesheet)
+    window = MainWindow('steel beam', 45)
     window.showMaximized()
     sys.exit(app.exec_())
 
