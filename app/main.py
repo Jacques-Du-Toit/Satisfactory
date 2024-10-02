@@ -1,21 +1,28 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QPushButton,
-    QWidget, QFrame, QHBoxLayout, QVBoxLayout
+    QWidget, QFrame, QHBoxLayout, QVBoxLayout, QScrollArea
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QGuiApplication
 from app.logic import *
 
 
 class MainWindow(QMainWindow):
     def __init__(self, part: str, required: float):
         super().__init__()
+        self.set_to_screen_size()
         self.trees = all_trees_from_part(part, required)
         self.tree_index = 0
         self.setWindowTitle("Satisfactory Helper")
         self.setWindowIcon(QIcon("../images/satisfactory_icon.webp"))
         self.gui_for_recipe(self.trees[self.tree_index])
+
+
+    def set_to_screen_size(self):
+        # Get the screen geometry using QScreen
+        screen_geometry = QGuiApplication.primaryScreen().availableGeometry()
+        self.setGeometry(screen_geometry)
 
     def show_stats(self, tree: list) -> QFrame:
         stats = eval_tree(tree)
@@ -38,12 +45,14 @@ class MainWindow(QMainWindow):
         stats_layout.addWidget(stats_label)
 
         for stat in stats:
-            stats_label = QLabel(f"{stat}: {stats[stat]}")
+            info = stats[stat]
+            if type(info) == float:
+                info = round(info, 2)
+            stats_label = QLabel(f"{stat}: {info}")
             stats_label.setStyleSheet("border: None;")
             stats_label.setAlignment(Qt.AlignCenter)
             stats_layout.addWidget(stats_label)
 
-        stats_frame.adjustSize()
         return stats_frame
 
     def next_recipe_click(self) -> None:
@@ -74,7 +83,6 @@ class MainWindow(QMainWindow):
         next_recipe.clicked.connect(self.next_recipe_click)
         buttons_layout.addWidget(next_recipe)
 
-        buttons_frame.adjustSize()
         return buttons_frame
 
 
@@ -107,7 +115,7 @@ class MainWindow(QMainWindow):
             info_layout = QVBoxLayout()
             # add info on outputs
             for info in ['output_per_minute', 'recipe_output_per_minute', 'machines_required', 'layer']:
-                label = QLabel(f"{info}: {recipe[info]}", recipe_and_output)
+                label = QLabel(f"{info}: {round(recipe[info], 2)}", recipe_and_output)
                 label.setStyleSheet("font-family: Arial; font-size: 14px; font-weight: Bold;")
                 label.setAlignment(Qt.AlignCenter)
                 info_layout.addWidget(label)
@@ -153,7 +161,7 @@ class MainWindow(QMainWindow):
             input_layout.addWidget(self.create_input_box(this_recipe, recipe))
 
         layout.addLayout(input_layout)
-        this_recipe.adjustSize()
+        outer_layout.addWidget(this_recipe)
         outer_layout.addWidget(this_recipe)
         return recipe_and_output
 
@@ -175,7 +183,6 @@ class MainWindow(QMainWindow):
 
             layout.addLayout(inputs_layout)
 
-        inputs_outputs_frame.adjustSize()
         return inputs_outputs_frame
 
     def gui_for_recipe(self, tree: list) -> None:
@@ -188,22 +195,31 @@ class MainWindow(QMainWindow):
         # Create a layout for the central widget
         layout = QHBoxLayout(central_widget)
 
-        # Add the final frame to the layout and align it to the center
-        layout.addWidget(tree_ui, stretch=10, alignment=Qt.AlignCenter)
+        # Create a QScrollArea and set the tree_ui as its widget
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)  # Ensures the scroll area resizes with content
 
+        # Set the tree_ui (which is presumably a QFrame or QWidget) as the scrollable widget
+        scroll_area.setWidget(tree_ui)
+
+        # Add the QScrollArea to the layout, instead of tree_ui directly
+        layout.addWidget(scroll_area, stretch=10)
+
+        # Add stats and buttons as a separate layout on the right side
         stats_and_turn = QVBoxLayout()
         stats_ui = self.show_stats(tree)
         button_ui = self.recipe_buttons()
         stats_and_turn.addWidget(stats_ui, alignment=Qt.AlignTop)
         stats_and_turn.addWidget(button_ui, alignment=Qt.AlignBottom)
 
+        # Add the stats and turn layout to the main layout
         layout.addLayout(stats_and_turn, stretch=1)
 
 
 
 def main():
     app = QApplication(sys.argv)
-    window = MainWindow('reinforced iron plate', 15)
+    window = MainWindow('modular frame', 2)
     window.showMaximized()
     sys.exit(app.exec_())
 

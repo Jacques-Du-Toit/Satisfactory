@@ -1,8 +1,70 @@
 from copy import deepcopy
 
 parts = {
-    'iron ingot': None,
-    'copper ingot': None,
+    'coal': None,
+    'iron ore': None,
+
+
+    'steel ingot': [
+        { # recipe 1
+            'index': 'steel ingot 0',
+            'machine': 'foundry',
+            'inputs': [
+                { # input 1
+                    'part': 'iron ore',
+                    'required_per_minute': 45
+                },
+                {
+                    'part': 'coal',
+                    'required_per_minute': 45
+                }
+            ],
+            'output_per_minute': 45
+        },
+        { # recipe 2
+            'index': 'steel ingot 1',
+            'machine': 'foundry',
+            'inputs': [
+                { # input 1
+                    'part': 'iron ingot',
+                    'required_per_minute': 40
+                },
+                {
+                    'part': 'coal',
+                    'required_per_minute': 40
+                }
+            ],
+            'output_per_minute': 60
+        }
+    ],
+
+    'steel beam': [
+        {  # recipe 1
+            'index': 'steel beam 0',
+            'machine': 'constructor',
+            'inputs': [
+                {  # input 1
+                    'part': 'steel ingot',
+                    'required_per_minute': 60
+                }
+            ],
+            'output_per_minute': 15
+        }
+    ],
+
+    'iron ingot': [
+        { # recipe 1
+            'index': 'iron ingot 0',
+            'machine': 'smelter',
+            'inputs': [
+                { # input 1
+                    'part': 'iron ore',
+                    'required_per_minute': 30
+                }
+            ],
+            'output_per_minute': 30
+        }
+    ],
 
     'iron plate': [
         { # recipe 1
@@ -73,10 +135,30 @@ parts = {
             ],
             'output_per_minute': 5
         }
+    ],
+
+    'modular frame': [
+        {
+            'index': 'modular frame 0',
+            'machine': 'assembler',
+            'inputs': [
+                {
+                    'part': 'reinforced iron plate',
+                    'required_per_minute': 3
+                },
+                {
+                    'part': 'iron rod',
+                    'required_per_minute': 12
+                },
+            ],
+            'output_per_minute': 2
+        }
     ]
 }
 
 power_usage = {
+    'smelter': 4,
+    'foundry': 16,
     'constructor': 4,
     'assembler': 15
 }
